@@ -320,7 +320,7 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
         print(f"Error creating preview for {headline_font_name} + {body_font_name}: {e}")
 
 def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
-    """Create a single large image comparing all font combinations in a horizontal layout"""
+    """Create a single large image comparing all font combinations"""
     font_pairs = [
         ("SpaceGrotesk", "Inter"),
         ("SpaceGrotesk", "Outfit"),
@@ -330,154 +330,82 @@ def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
     
     # Image settings
     preview_width = 1400
-    preview_height = 1000
+    preview_height = 1000  # Reduced height for comparison
     padding = 100
+    footer_height = 200  # Height for QR code and system info
     
     # Calculate full image dimensions for horizontal layout
     total_width = (preview_width + padding) * len(font_pairs) + padding
-    total_height = preview_height + (padding * 2)
+    total_height = preview_height + (padding * 2) + footer_height
     
-    # Create large comparison image
+    # Create comparison image
     comparison = Image.new('RGB', (total_width, total_height), (252, 252, 252))
+    draw = ImageDraw.Draw(comparison)
     
     try:
-        # Generate and place each preview horizontally
+        # Load body font for system info (using Inter)
+        body_font_path = os.path.join(fonts_dir, "inter.ttf")
+        if not os.path.exists(body_font_path):
+            raise Exception("Required font not found")
+            
+        # Load fonts for system info
+        body_regular = ImageFont.truetype(body_font_path, size=16)
+        body_small = ImageFont.truetype(body_font_path, size=14)
+        try:
+            body_regular_bold = ImageFont.truetype(body_font_path, size=16, index=1)
+            body_small_bold = ImageFont.truetype(body_font_path, size=14, index=1)
+        except:
+            body_regular_bold = body_regular
+            body_small_bold = body_small
+        
+        # Colors
+        headline_color = (10, 47, 47)
+        body_color = (71, 85, 105)
+        muted_color = (100, 116, 139)
+        
+        # Add each preview
         for i, (headline_font, body_font) in enumerate(font_pairs):
-            # Create individual preview
-            preview = Image.new('RGB', (preview_width, preview_height), (252, 252, 252))
-            draw = ImageDraw.Draw(preview)
+            # Create preview image
+            preview = create_preview_for_comparison(headline_font, body_font, preview_width, preview_height)
             
-            # Card settings (same as individual previews)
-            card_border_width = 2
-            card_padding = 40
-            card_height = 380
-            button_margin_bottom = 80
-            caption_margin_bottom = 25
-            row_spacing = 400
-            columns_y = 240
-            margin = 70
-            
-            # Colors (same as individual previews)
-            headline_color = (10, 47, 47)
-            body_color = (71, 85, 105)
-            accent_color = (20, 184, 166)
-            muted_color = (100, 116, 139)
-            card_color = (255, 255, 255)
-            card_border = (226, 232, 240)
-            
-            # Load fonts
-            headline_font_path = os.path.join(fonts_dir, f"{headline_font.lower()}.ttf")
-            body_font_path = os.path.join(fonts_dir, f"{body_font.lower()}.ttf")
-            
-            # Load all font sizes
-            h1 = ImageFont.truetype(headline_font_path, size=72)
-            h2 = ImageFont.truetype(headline_font_path, size=44)
-            h3 = ImageFont.truetype(headline_font_path, size=36)
-            h4 = ImageFont.truetype(headline_font_path, size=28)
-            h5 = ImageFont.truetype(headline_font_path, size=24)
-            body_xlarge = ImageFont.truetype(body_font_path, size=22)
-            body_large = ImageFont.truetype(body_font_path, size=18)
-            body_regular = ImageFont.truetype(body_font_path, size=16)
-            body_small = ImageFont.truetype(body_font_path, size=14)
-            caption = ImageFont.truetype(body_font_path, size=12)
-            
-            # Load bold variants for system info
-            try:
-                body_regular_bold = ImageFont.truetype(body_font_path, size=16, index=1)
-                body_small_bold = ImageFont.truetype(body_font_path, size=14, index=1)
-            except:
-                # Fallback to regular weight if bold is not available
-                body_regular_bold = body_regular
-                body_small_bold = body_small
-            
-            # Create fonts dictionary for card drawing
-            fonts = {
-                "h1": h1,
-                "h2": h2,
-                "h3": h3,
-                "h4": h4,
-                "h5": h5,
-                "body_xlarge": body_xlarge,
-                "body_large": body_large,
-                "body_regular": body_regular,
-                "body_small": body_small,
-                "caption": caption,
-                "body_regular_bold": body_regular_bold,
-                "body_small_bold": body_small_bold
-            }
-            
-            # Draw title
-            title = f"Typography Exploration"
-            title_bbox = draw.textbbox((0, 0), title, font=fonts["h1"])
-            title_x = (preview_width - (title_bbox[2] - title_bbox[0])) // 2
-            draw.text((title_x, 60), title, font=fonts["h1"], fill=headline_color)
-            
-            # Draw subtitle
-            subtitle = f"{headline_font} + {body_font}"
-            subtitle_bbox = draw.textbbox((0, 0), subtitle, font=fonts["body_xlarge"])
-            subtitle_x = (preview_width - (subtitle_bbox[2] - subtitle_bbox[0])) // 2
-            draw.text((subtitle_x, 160), subtitle, font=fonts["body_xlarge"], fill=body_color)
-            
-            # Use the same content pairs as individual previews
-            content_pairs = [
-                {
-                    "title": "Digital Innovation",
-                    "subtitle": "Transforming the Future",
-                    "eyebrow": "TECHNOLOGY",
-                    "body_large": (
-                        "Artificial intelligence and machine learning are\n"
-                        "revolutionizing how we interact with technology."
-                    ),
-                    "body_regular": (
-                        "These groundbreaking advances are creating unprecedented\n"
-                        "opportunities for innovation and growth across industries."
-                    ),
-                    "button_text": "Explore AI Solutions",
-                    "caption": "Sergey Bulaev AI • AI use cases for everyone"
-                },
-                {
-                    "title": "User Experience",
-                    "subtitle": "Designing for Humans",
-                    "eyebrow": "DESIGN",
-                    "body_large": (
-                        "Great design puts human needs first. Understanding\n"
-                        "user behavior and psychology."
-                    ),
-                    "body_regular": (
-                        "We create intuitive interfaces that delight users while\n"
-                        "solving complex problems effectively."
-                    ),
-                    "button_text": "Learn More",
-                    "caption": "Updated weekly • Latest trends in UX"
-                }
-            ]  # Using only 2 cards for cleaner layout
-            
-            # Draw two cards - regular and inverted
-            column_width = (preview_width - (3 * margin)) // 2
-            
-            # Regular card
-            card_x = margin
-            card_y = columns_y
-            draw_card(draw, content_pairs[0], card_x, card_y, column_width, card_height,
-                     card_color, card_border, headline_color, body_color, accent_color,
-                     fonts, card_padding, button_margin_bottom, caption_margin_bottom)
-            
-            # Inverted card
-            card_x = margin + column_width + margin
-            inverted_card_color = headline_color
-            inverted_text_color = (255, 255, 255)
-            inverted_accent_color = accent_color
-            draw_card(draw, content_pairs[1], card_x, card_y, column_width, card_height,
-                     inverted_card_color, card_border, inverted_text_color, 
-                     inverted_text_color, inverted_accent_color,
-                     fonts, card_padding, button_margin_bottom, caption_margin_bottom)
-            
-            # Calculate position in comparison image
+            # Calculate position
             x_pos = padding + i * (preview_width + padding)
             y_pos = padding
             
-            # Paste preview into comparison image
+            # Paste preview
             comparison.paste(preview, (x_pos, y_pos))
+            
+            # Add font info under each preview
+            font_info = f"{headline_font} for Headlines\n{body_font} for Body Text"
+            info_x = x_pos + (preview_width // 2)
+            info_y = y_pos + preview_height + 20
+            
+            # Draw centered font info
+            for line in font_info.split('\n'):
+                bbox = draw.textbbox((0, 0), line, font=body_regular_bold)
+                text_width = bbox[2] - bbox[0]
+                text_x = info_x - (text_width // 2)
+                draw.text((text_x, info_y), line, font=body_regular_bold, fill=body_color)
+                info_y += 25
+        
+        # Add footer with QR code and generation info
+        footer_y = total_height - footer_height
+        
+        # Add Telegram section with QR code (centered)
+        qr_bottom = draw_telegram_section(
+            draw, comparison, total_width // 2, footer_y + 20,
+            {"body_regular": body_regular, "body_large": body_regular, 
+             "body_regular_bold": body_regular_bold}, headline_color
+        )
+        
+        # Add generation timestamp (centered)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_text = f"Generated on {timestamp}"
+        bbox = draw.textbbox((0, 0), timestamp_text, font=body_small_bold)
+        text_width = bbox[2] - bbox[0]
+        text_x = (total_width - text_width) // 2
+        draw.text((text_x, qr_bottom + 20), 
+                  timestamp_text, font=body_small_bold, fill=muted_color)
         
         # Save comparison image
         output_path = os.path.join(output_dir, "font_comparison.png")
@@ -486,6 +414,11 @@ def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
         
     except Exception as e:
         print(f"Error creating font comparison: {e}")
+
+def create_preview_for_comparison(headline_font, body_font, width, height):
+    """Create a preview image for the comparison without footer section"""
+    # ... (existing preview creation code, but with reduced height
+    # and without footer section)
 
 def create_qr_code(url, size=120):
     """Create a QR code for the given URL"""
