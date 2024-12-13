@@ -132,7 +132,13 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
     row_spacing = 400  # Increased from 360 to prevent overlap
     columns_y = 240    # Starting Y position for first row
     
-    image = Image.new('RGB', (width, height), background_color)
+    # Create base image with transparent background
+    image = Image.new('RGBA', (width, height), (252, 252, 252, 255))
+    
+    # Apply background pattern
+    pattern_color = (10, 47, 47)  # Dark teal to match headline color
+    image = apply_background_pattern(image, pattern_color)
+    
     draw = ImageDraw.Draw(image)
     
     try:
@@ -180,17 +186,18 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
             "body_small_bold": body_small_bold
         }
         
-        # Main title section (centered, top)
-        title = "Typography Exploration"
-        title_bbox = draw.textbbox((0, 0), title, font=fonts["h1"])
-        title_x = (width - (title_bbox[2] - title_bbox[0])) // 2
-        draw.text((title_x, 60), title, font=fonts["h1"], fill=headline_color)
+        # Colors dictionary
+        colors = {
+            "headline": headline_color,
+            "body": body_color,
+            "accent": accent_color,
+            "muted": muted_color
+        }
         
-        # Subtitle with more spacing
+        # Draw header with logo
+        title = "Typography Exploration"
         subtitle = f"A Visual Study of {headline_font_name} + {body_font_name}"
-        subtitle_bbox = draw.textbbox((0, 0), subtitle, font=fonts["body_xlarge"])
-        subtitle_x = (width - (subtitle_bbox[2] - subtitle_bbox[0])) // 2
-        draw.text((subtitle_x, 160), subtitle, font=fonts["body_xlarge"], fill=body_color)
+        draw_header_with_logo(draw, image, title, subtitle, fonts, colors)
         
         # Content pairs with varied text sizes and proper line breaks
         content_pairs = [
@@ -417,8 +424,110 @@ def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
 
 def create_preview_for_comparison(headline_font, body_font, width, height):
     """Create a preview image for the comparison without footer section"""
-    # ... (existing preview creation code, but with reduced height
-    # and without footer section)
+    # Create base image with transparent background
+    preview = Image.new('RGBA', (width, height), (252, 252, 252, 255))
+    
+    # Apply background pattern
+    pattern_color = (10, 47, 47)  # Dark teal to match headline color
+    preview = apply_background_pattern(preview, pattern_color)
+    
+    draw = ImageDraw.Draw(preview)
+    
+    try:
+        # Load fonts
+        headline_font_path = os.path.join("fonts", f"{headline_font.lower()}.ttf")
+        body_font_path = os.path.join("fonts", f"{body_font.lower()}.ttf")
+        
+        # Card settings
+        card_border_width = 2
+        card_padding = 40
+        card_height = 380
+        button_margin_bottom = 80
+        caption_margin_bottom = 25
+        row_spacing = 400
+        columns_y = 240
+        margin = 70
+        
+        # Colors
+        headline_color = (10, 47, 47)
+        body_color = (71, 85, 105)
+        accent_color = (20, 184, 166)
+        muted_color = (100, 116, 139)
+        card_color = (255, 255, 255)
+        card_border = (226, 232, 240)
+        
+        # Load all font sizes
+        fonts = {
+            "h1": ImageFont.truetype(headline_font_path, size=72),
+            "h2": ImageFont.truetype(headline_font_path, size=44),
+            "h3": ImageFont.truetype(headline_font_path, size=36),
+            "h4": ImageFont.truetype(headline_font_path, size=28),
+            "h5": ImageFont.truetype(headline_font_path, size=24),
+            "body_xlarge": ImageFont.truetype(body_font_path, size=22),
+            "body_large": ImageFont.truetype(body_font_path, size=18),
+            "body_regular": ImageFont.truetype(body_font_path, size=16),
+            "body_small": ImageFont.truetype(body_font_path, size=14),
+            "caption": ImageFont.truetype(body_font_path, size=12)
+        }
+        
+        # Colors dictionary
+        colors = {
+            "headline": headline_color,
+            "body": body_color,
+            "accent": accent_color,
+            "muted": muted_color
+        }
+        
+        # Draw header with logo
+        title = "Typography Exploration"
+        subtitle = f"{headline_font} + {body_font}"
+        draw_header_with_logo(draw, preview, title, subtitle, fonts, colors)
+        
+        # Content pairs
+        content_pairs = [
+            {
+                "title": "Digital Innovation",
+                "subtitle": "Transforming the Future",
+                "eyebrow": "TECHNOLOGY",
+                "body_large": "Artificial intelligence and machine learning are\nrevolutionizing how we interact with technology.",
+                "body_regular": "These groundbreaking advances are creating unprecedented\nopportunities for innovation and growth across industries.",
+                "button_text": "Explore AI Solutions",
+                "caption": "Sergey Bulaev AI • AI use cases for everyone"
+            },
+            {
+                "title": "User Experience",
+                "subtitle": "Designing for Humans",
+                "eyebrow": "DESIGN",
+                "body_large": "Great design puts human needs first. Understanding\nuser behavior and psychology.",
+                "body_regular": "We create intuitive interfaces that delight users while\nsolving complex problems effectively.",
+                "button_text": "Learn More",
+                "caption": "Updated weekly • Latest trends in UX"
+            }
+        ]
+        
+        # Calculate card width
+        column_width = (width - (3 * margin)) // 2
+        
+        # Draw cards
+        for i, content in enumerate(content_pairs):
+            x = margin + (i * (column_width + margin))
+            y = columns_y
+            
+            # Determine if this should be an inverted card
+            is_inverted = (i == 1)
+            card_bg = headline_color if is_inverted else card_color
+            text_color = (255, 255, 255) if is_inverted else headline_color
+            body_text_color = (255, 255, 255) if is_inverted else body_color
+            
+            draw_card(draw, content, x, y, column_width, card_height,
+                     card_bg, card_border, text_color, body_text_color, accent_color,
+                     fonts, card_padding, button_margin_bottom, caption_margin_bottom)
+        
+        return preview
+        
+    except Exception as e:
+        print(f"Error creating preview for comparison: {e}")
+        return None
 
 def create_qr_code(url, size=120):
     """Create a QR code for the given URL"""
@@ -635,6 +744,115 @@ def verify_existing_fonts():
                 print(f"✗ {font_name} is invalid")
         else:
             print(f"- {font_name} does not exist")
+
+def load_and_resize_logo(size=80):
+    """Load and resize logo if it exists"""
+    for ext in ['.jpg', '.png']:
+        logo_path = f"logo{ext}"
+        if os.path.exists(logo_path):
+            try:
+                logo = Image.open(logo_path)
+                # Maintain aspect ratio and ensure integer dimensions
+                aspect = logo.width / logo.height
+                new_width = int(round(size * aspect))  # Round and convert to integer
+                new_height = int(round(size))  # Ensure height is also integer
+                
+                logo = logo.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                if logo.mode != 'RGBA':
+                    logo = logo.convert('RGBA')
+                return logo
+            except Exception as e:
+                print(f"Error loading logo: {e}")
+    return None
+
+def draw_header_with_logo(draw, image, title, subtitle, fonts, colors, margin=70, y_offset=60):
+    """Draw header with logo and left-aligned text"""
+    # Calculate title dimensions for precise alignment
+    title_bbox = draw.textbbox((0, 0), title, font=fonts["h1"])
+    title_height = title_bbox[3] - title_bbox[1]
+    
+    # Calculate subtitle dimensions
+    subtitle_bbox = draw.textbbox((0, 0), subtitle, font=fonts["body_xlarge"])
+    subtitle_height = subtitle_bbox[3] - subtitle_bbox[1]
+    
+    # Calculate total text block height
+    text_spacing = 25  # Space between title and subtitle
+    total_text_height = title_height + text_spacing + subtitle_height
+    
+    # Load logo matching the total text height
+    logo = load_and_resize_logo(size=total_text_height)
+    
+    if logo:
+        # Calculate vertical position to align logo top with title top
+        logo_x = margin
+        logo_y = y_offset + 5  # Added 5 pixels offset
+        image.paste(logo, (logo_x, logo_y), logo)
+        
+        # Calculate text position (to the right of logo)
+        text_x = logo_x + logo.width + 40  # Space between logo and text
+    else:
+        # No logo, use margin
+        text_x = margin
+    
+    # Draw title aligned with logo top
+    draw.text((text_x, y_offset), title, 
+              font=fonts["h1"], fill=colors["headline"])
+    
+    # Draw subtitle below title
+    subtitle_y = y_offset + title_height + text_spacing
+    draw.text((text_x, subtitle_y), subtitle, 
+              font=fonts["body_xlarge"], fill=colors["body"])
+
+def create_penrose_pattern(width, height, color, opacity=0.035):
+    """Create a subtle Penrose-like tiling pattern"""
+    pattern = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(pattern)
+    
+    # Basic rhombus dimensions
+    rhombus_size = 15  # Even smaller pattern (changed from 25)
+    acute_angle = 32  # Keep the same angles
+    obtuse_angle = 148
+    
+    # Calculate coordinates for thin rhombus
+    def get_thin_rhombus(x, y):
+        import math
+        rad_acute = math.radians(acute_angle)
+        rad_obtuse = math.radians(obtuse_angle)
+        
+        points = [
+            (x, y),
+            (x + rhombus_size * math.cos(rad_acute), y + rhombus_size * math.sin(rad_acute)),
+            (x + rhombus_size * (math.cos(rad_acute) + math.cos(rad_obtuse)), 
+             y + rhombus_size * (math.sin(rad_acute) + math.sin(rad_obtuse))),
+            (x + rhombus_size * math.cos(rad_obtuse), y + rhombus_size * math.sin(rad_obtuse)),
+        ]
+        return points
+    
+    # Draw pattern
+    pattern_color = color + (int(255 * opacity),)  # Add opacity to color
+    
+    # Create denser grid of rhombuses
+    for row in range(-4, height // rhombus_size + 5):
+        for col in range(-4, width // rhombus_size + 5):
+            x = col * rhombus_size * 1.1  # Even tighter spacing (changed from 1.2)
+            y = row * rhombus_size * 1.1
+            
+            # Add more variation to create sophisticated Penrose-like effect
+            if (row + col) % 3 == 0:
+                points = get_thin_rhombus(x, y)
+                draw.polygon(points, fill=pattern_color, outline=None)
+            
+            # Draw rotated rhombus with offset
+            points = get_thin_rhombus(x + rhombus_size/3, y + rhombus_size/3)
+            points = [(x + rhombus_size/3, y) for x, y in points]
+            draw.polygon(points, fill=pattern_color, outline=None)
+    
+    return pattern
+
+def apply_background_pattern(image, color):
+    """Apply subtle Penrose pattern to background"""
+    pattern = create_penrose_pattern(image.width, image.height, color)
+    return Image.alpha_composite(image.convert('RGBA'), pattern)
 
 if __name__ == "__main__":
     print("Checking and downloading fonts...")
