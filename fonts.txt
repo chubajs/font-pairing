@@ -1,13 +1,13 @@
-# Font pairs for comparison (one per line)
-SpaceGrotesk + Inter
-SpaceGrotesk + Outfit
-SpaceGrotesk + DMSans
-SpaceGrotesk + PublicSans
-
-# Available fonts
-# Format: FontName|css_url
-SpaceGrotesk|https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500&display=swap
-Inter|https://fonts.googleapis.com/css2?family=Inter&display=swap
-Outfit|https://fonts.googleapis.com/css2?family=Outfit&display=swap
-DMSans|https://fonts.googleapis.com/css2?family=DM+Sans&display=swap
-PublicSans|https://fonts.googleapis.com/css2?family=Public+Sans&display=swap 
+Font pairs for comparison
+Space Grotesk + Plus Jakarta Sans
+Space Grotesk + Inter
+Space Grotesk + Outfit
+Space Grotesk + DM Sans
+Space Grotesk + Public Sans
+Available fonts
+Space Grotesk|https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap
+Plus Jakarta Sans|https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap
+Inter|https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap
+Outfit|https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap
+DM Sans|https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap
+Public Sans|https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap

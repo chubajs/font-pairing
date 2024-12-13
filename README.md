@@ -46,7 +46,7 @@ Currently supports the following font pairs:
 - Space Grotesk + Inter
 - Space Grotesk + Outfit
 - Space Grotesk + DM Sans
-- Space Grotesk + Public Sans
+- Space Grotesk + Plus Jakarta Sans
 
 ## Output
 
@@ -92,14 +92,14 @@ MIT License - feel free to use in your projects.
 To generate font pairs for comparison, you can use an AI assistant like Claude with the following prompt (copy everything after the line):
 
 ---
-I need help selecting Google Fonts pairs for a typography comparison. I'm looking for:
-1. A modern geometric sans-serif font for headlines
-2. Several clean, highly readable sans-serif fonts for body text that would pair well with the headline font
+I need help selecting Google Fonts pairs for Space Grotesk. I'm looking for:
+1. Space Grotesk will be used for headlines
+2. I need 4-5 clean, highly readable sans-serif fonts that would pair well with Space Grotesk for body text
 
 For each font, please provide:
 - Font name as used in Google Fonts
 - CSS import URL
-- Brief explanation of why this font works well in this role
+- Brief explanation of why this font pairs well with Space Grotesk
 
 Please format the output so it can be added to a fonts.txt file with the structure:
 FontName|css_url
@@ -107,10 +107,18 @@ FontName|css_url
 
 The fonts.txt file should follow this format:
 
-# Font pairs for comparison (one per line)
-HeadlineFont + BodyFont1
-HeadlineFont + BodyFont2
+Font pairs for comparison (one per line)
+Main Font + BodyFont1
+Main Font + BodyFont2
+Main Font + BodyFont3
+Main Font + BodyFont4
 
-# Available fonts
-# Format: FontName|css_url
-FontName|css_url
+Available fonts
+Format: FontName|css_url
+Space Grotesk|https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap
+BodyFont1|css_import_url
+BodyFont2|css_import_url
+BodyFont3|css_import_url
+BodyFont4|css_import_url
+
+Note: Font names can contain spaces (like "Plus Jakarta Sans"). The script will handle spaces in font names correctly.
