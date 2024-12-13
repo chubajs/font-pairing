@@ -143,8 +143,8 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
         if not all(os.path.exists(p) for p in [headline_font_path, body_font_path]):
             raise Exception("Required fonts not found")
         
-        # Extended font sizes
-        h1 = ImageFont.truetype(headline_font_path, size=72)  # Larger main title
+        # Load all font sizes
+        h1 = ImageFont.truetype(headline_font_path, size=72)
         h2 = ImageFont.truetype(headline_font_path, size=44)
         h3 = ImageFont.truetype(headline_font_path, size=36)
         h4 = ImageFont.truetype(headline_font_path, size=28)
@@ -155,18 +155,43 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
         body_small = ImageFont.truetype(body_font_path, size=14)
         caption = ImageFont.truetype(body_font_path, size=12)
         
+        # Load bold variants for system info
+        try:
+            body_regular_bold = ImageFont.truetype(body_font_path, size=16, index=1)
+            body_small_bold = ImageFont.truetype(body_font_path, size=14, index=1)
+        except:
+            # Fallback to regular weight if bold is not available
+            body_regular_bold = body_regular
+            body_small_bold = body_small
+        
+        # Create fonts dictionary for card drawing
+        fonts = {
+            "h1": h1,
+            "h2": h2,
+            "h3": h3,
+            "h4": h4,
+            "h5": h5,
+            "body_xlarge": body_xlarge,
+            "body_large": body_large,
+            "body_regular": body_regular,
+            "body_small": body_small,
+            "caption": caption,
+            "body_regular_bold": body_regular_bold,
+            "body_small_bold": body_small_bold
+        }
+        
         # Main title section (centered, top)
         title = "Typography Exploration"
-        title_bbox = draw.textbbox((0, 0), title, font=h1)
+        title_bbox = draw.textbbox((0, 0), title, font=fonts["h1"])
         title_x = (width - (title_bbox[2] - title_bbox[0])) // 2
-        draw.text((title_x, 60), title, font=h1, fill=headline_color)
+        draw.text((title_x, 60), title, font=fonts["h1"], fill=headline_color)
         
         # Subtitle with more spacing
         subtitle = f"A Visual Study of {headline_font_name} + {body_font_name}"
-        subtitle_bbox = draw.textbbox((0, 0), subtitle, font=body_xlarge)
+        subtitle_bbox = draw.textbbox((0, 0), subtitle, font=fonts["body_xlarge"])
         subtitle_x = (width - (subtitle_bbox[2] - subtitle_bbox[0])) // 2
-        draw.text((subtitle_x, 160), subtitle, font=body_xlarge, fill=body_color)
-
+        draw.text((subtitle_x, 160), subtitle, font=fonts["body_xlarge"], fill=body_color)
+        
         # Content pairs with varied text sizes and proper line breaks
         content_pairs = [
             {
@@ -253,42 +278,37 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
                 body_text_color = (255, 255, 255) if is_inverted else body_color
                 
                 # Draw card using helper function
-                fonts = {
-                    "h2": h2, "h5": h5, "body_large": body_large,
-                    "body_regular": body_regular, "body_small": body_small,
-                    "caption": caption
-                }
-                
                 draw_card(draw, content, x, y, column_width, card_height,
                          card_bg, card_border, text_color, body_text_color, accent_color,
                          fonts, card_padding, button_margin_bottom, caption_margin_bottom)
 
-        # Add footer with more space
-        footer_y = height - 80
-        footer_text = f"{headline_font_name} for Headlines • {body_font_name} for Body Text • Font Pairing Preview"
-        footer_bbox = draw.textbbox((0, 0), footer_text, font=body_small)
-        footer_x = (width - (footer_bbox[2] - footer_bbox[0])) // 2
-        draw.text((footer_x, footer_y), footer_text, font=body_small, fill=muted_color)
-
-        # Add Telegram section
-        telegram_y = height - 320  # Move up further
-        draw_telegram_section(draw, image, width, telegram_y, body_large, headline_color)
-
-        # Add font information with more spacing
-        font_info_y = height - 140  # Adjusted position
-        font_info = f"{headline_font_name} for Headlines • {body_font_name} for Body Text"
-        font_bbox = draw.textbbox((0, 0), font_info, font=body_regular)
-        font_x = (width - (font_bbox[2] - font_bbox[0])) // 2
-        draw.text((font_x, font_info_y), font_info, font=body_regular, fill=body_color)
+        # Bottom section y-position
+        bottom_y = height - 200
         
-        # Add timestamp with proper spacing
-        timestamp_y = height - 80  # Adjusted position
+        # Add Telegram section (left) and get QR bottom position
+        qr_bottom = draw_telegram_section(draw, image, width, bottom_y, fonts, headline_color)
+        
+        # Add service information (right)
+        right_margin = 70
+        right_x = width - right_margin
+        line_spacing = 30
+        
+        # Font information aligned with bottom of QR
+        font_info = f"{headline_font_name} for Headlines • {body_font_name} for Body Text"
+        font_bbox = draw.textbbox((0, 0), font_info, font=fonts["body_regular_bold"])  # Using bold font
+        font_width = font_bbox[2] - font_bbox[0]
+        font_x = right_x - font_width
+        draw.text((font_x, qr_bottom - 45),  # Position relative to QR bottom
+                  font_info, font=fonts["body_regular_bold"], fill=body_color)
+        
+        # Add timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         timestamp_text = f"Generated on {timestamp}"
-        timestamp_bbox = draw.textbbox((0, 0), timestamp_text, font=body_small)
-        timestamp_x = (width - (timestamp_bbox[2] - timestamp_bbox[0])) // 2
-        draw.text((timestamp_x, timestamp_y), timestamp_text, 
-                  font=body_small, fill=muted_color)
+        timestamp_bbox = draw.textbbox((0, 0), timestamp_text, font=fonts["body_small_bold"])  # Using bold font
+        timestamp_width = timestamp_bbox[2] - timestamp_bbox[0]
+        timestamp_x = right_x - timestamp_width
+        draw.text((timestamp_x, qr_bottom - 20),  # Position relative to QR bottom
+                  timestamp_text, font=fonts["body_small_bold"], fill=muted_color)
 
         # Save the image
         output_filename = f"{headline_font_name.lower()}_{body_font_name.lower()}.png"
@@ -361,17 +381,42 @@ def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
             body_small = ImageFont.truetype(body_font_path, size=14)
             caption = ImageFont.truetype(body_font_path, size=12)
             
+            # Load bold variants for system info
+            try:
+                body_regular_bold = ImageFont.truetype(body_font_path, size=16, index=1)
+                body_small_bold = ImageFont.truetype(body_font_path, size=14, index=1)
+            except:
+                # Fallback to regular weight if bold is not available
+                body_regular_bold = body_regular
+                body_small_bold = body_small
+            
+            # Create fonts dictionary for card drawing
+            fonts = {
+                "h1": h1,
+                "h2": h2,
+                "h3": h3,
+                "h4": h4,
+                "h5": h5,
+                "body_xlarge": body_xlarge,
+                "body_large": body_large,
+                "body_regular": body_regular,
+                "body_small": body_small,
+                "caption": caption,
+                "body_regular_bold": body_regular_bold,
+                "body_small_bold": body_small_bold
+            }
+            
             # Draw title
             title = f"Typography Exploration"
-            title_bbox = draw.textbbox((0, 0), title, font=h1)
+            title_bbox = draw.textbbox((0, 0), title, font=fonts["h1"])
             title_x = (preview_width - (title_bbox[2] - title_bbox[0])) // 2
-            draw.text((title_x, 60), title, font=h1, fill=headline_color)
+            draw.text((title_x, 60), title, font=fonts["h1"], fill=headline_color)
             
             # Draw subtitle
             subtitle = f"{headline_font} + {body_font}"
-            subtitle_bbox = draw.textbbox((0, 0), subtitle, font=body_xlarge)
+            subtitle_bbox = draw.textbbox((0, 0), subtitle, font=fonts["body_xlarge"])
             subtitle_x = (preview_width - (subtitle_bbox[2] - subtitle_bbox[0])) // 2
-            draw.text((subtitle_x, 160), subtitle, font=body_xlarge, fill=body_color)
+            draw.text((subtitle_x, 160), subtitle, font=fonts["body_xlarge"], fill=body_color)
             
             # Use the same content pairs as individual previews
             content_pairs = [
@@ -493,19 +538,20 @@ def draw_button_with_shadow(draw, x, y, width, height, bg_color, text, font, tex
     
     return button_image
 
-def draw_telegram_section(draw, image, width, y_position, font, text_color):
-    """Draw Telegram channel link and QR code"""
+def draw_telegram_section(draw, image, width, y_position, fonts, text_color):
+    """Draw Telegram channel link and QR code in the bottom left corner with text on the right"""
     telegram_url = "https://t.me/sergiobulaev"
     channel_name = "Sergey Bulaev AI"
     channel_description = "AI use cases for everyone"
     
     # Create QR code
-    qr_size = 140  # Slightly larger QR code
+    qr_size = 120  # QR code size
     qr_image = create_qr_code(telegram_url, size=qr_size)
     
-    # Calculate positions
-    qr_x = (width - qr_size) // 2
-    qr_y = y_position - 40  # Move up by 40px
+    # Calculate positions for left corner
+    margin = 70  # Match card margin
+    qr_x = margin
+    qr_y = y_position
     
     # Convert QR to RGBA if needed
     if qr_image.mode != 'RGBA':
@@ -514,32 +560,26 @@ def draw_telegram_section(draw, image, width, y_position, font, text_color):
     # Paste QR code
     image.paste(qr_image, (qr_x, qr_y), qr_image)
     
-    # Draw channel information with different font sizes
-    channel_font = ImageFont.truetype(font.path, size=24)  # Larger size for channel name
-    link_font = ImageFont.truetype(font.path, size=18)     # Medium size for link
-    desc_font = ImageFont.truetype(font.path, size=16)     # Smaller size for description
+    # Position text to the right of QR code
+    text_x = qr_x + qr_size + 30  # Add some spacing after QR
     
-    # Draw channel name
-    text_bbox = draw.textbbox((0, 0), channel_name, font=channel_font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_x = (width - text_width) // 2
-    draw.text((text_x, qr_y + qr_size + 20), 
-              channel_name, font=channel_font, fill=text_color)
+    # Calculate vertical positions from bottom of QR
+    text_bottom = qr_y + qr_size
+    line_spacing = 25
     
-    # Draw Telegram link
-    link_text = "t.me/sergiobulaev"
-    text_bbox = draw.textbbox((0, 0), link_text, font=link_font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_x = (width - text_width) // 2
-    draw.text((text_x, qr_y + qr_size + 55), 
-              link_text, font=link_font, fill=text_color)
+    # Draw description (bottom)
+    draw.text((text_x, text_bottom - line_spacing), 
+              channel_description, font=fonts["body_regular"], fill=text_color)
     
-    # Draw description
-    text_bbox = draw.textbbox((0, 0), channel_description, font=desc_font)
-    text_width = text_bbox[2] - text_bbox[0]
-    text_x = (width - text_width) // 2
-    draw.text((text_x, qr_y + qr_size + 85), 
-              channel_description, font=desc_font, fill=text_color)
+    # Draw Telegram link (middle)
+    draw.text((text_x, text_bottom - (line_spacing * 2)), 
+              telegram_url, font=fonts["body_large"], fill=text_color)
+    
+    # Draw channel name (top)
+    draw.text((text_x, text_bottom - (line_spacing * 3)), 
+              channel_name, font=fonts["body_regular_bold"], fill=text_color)
+    
+    return qr_y + qr_size  # Return bottom of QR code for system info alignment
 
 def draw_card(draw, content, x, y, width, height, bg_color, border_color, 
               text_color, body_text_color, accent_color, fonts, padding,
