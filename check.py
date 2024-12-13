@@ -5,31 +5,35 @@ from pathlib import Path
 import qrcode
 from datetime import datetime
 
+def load_font_config(config_file="fonts.txt"):
+    """Load font configuration from file"""
+    fonts_data = {}
+    font_pairs = []
+    
+    with open(config_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+                
+            if ' + ' in line:  # Changed from '+' to ' + ' to avoid matching URLs
+                # Font pair line
+                headline_font, body_font = [f.strip() for f in line.split(' + ')]
+                font_pairs.append((headline_font, body_font))
+            elif '|' in line:
+                # Font definition line
+                font_name, css_url = [f.strip() for f in line.split('|')]
+                fonts_data[font_name] = {
+                    "css_url": css_url,
+                    "filename": f"{font_name.lower()}.ttf",
+                }
+    
+    return fonts_data, font_pairs
+
 class FontManager:
     def __init__(self, fonts_dir="fonts"):
         self.fonts_dir = fonts_dir
-        self.fonts_data = {
-            "SpaceGrotesk": {
-                "css_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500&display=swap",
-                "filename": "spacegrotesk.ttf",
-            },
-            "Inter": {
-                "css_url": "https://fonts.googleapis.com/css2?family=Inter&display=swap",
-                "filename": "inter.ttf",
-            },
-            "Outfit": {
-                "css_url": "https://fonts.googleapis.com/css2?family=Outfit&display=swap",
-                "filename": "outfit.ttf",
-            },
-            "DMSans": {
-                "css_url": "https://fonts.googleapis.com/css2?family=DM+Sans&display=swap",
-                "filename": "dmsans.ttf",
-            },
-            "PublicSans": {
-                "css_url": "https://fonts.googleapis.com/css2?family=Public+Sans&display=swap",
-                "filename": "publicsans.ttf",
-            }
-        }
+        self.fonts_data, _ = load_font_config()  # Load from fonts.txt
         
         # Create fonts directory if it doesn't exist
         os.makedirs(self.fonts_dir, exist_ok=True)
@@ -328,12 +332,8 @@ def create_font_preview(headline_font_name, body_font_name, fonts_dir="fonts", o
 
 def create_font_comparison(fonts_dir="fonts", output_dir="font_previews"):
     """Create a single large image comparing all font combinations"""
-    font_pairs = [
-        ("SpaceGrotesk", "Inter"),
-        ("SpaceGrotesk", "Outfit"),
-        ("SpaceGrotesk", "DMSans"),
-        ("SpaceGrotesk", "PublicSans")
-    ]
+    # Load font pairs from config
+    _, font_pairs = load_font_config()
     
     # Image settings
     preview_width = 1400
@@ -716,14 +716,10 @@ def generate_all_previews():
         os.makedirs(output_dir)
         print("Created previews directory")
     
-    # Generate individual previews
-    font_pairs = [
-        ("SpaceGrotesk", "Inter"),
-        ("SpaceGrotesk", "Outfit"),
-        ("SpaceGrotesk", "DMSans"),
-        ("SpaceGrotesk", "PublicSans")
-    ]
+    # Load font pairs from config
+    _, font_pairs = load_font_config()
     
+    # Generate individual previews
     for headline_font, body_font in font_pairs:
         create_font_preview(headline_font, body_font)
     

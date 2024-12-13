@@ -86,3 +86,31 @@ Created by [Sergey Bulaev](https://t.me/sergiobulaev) - Follow for more AI and d
 ## License
 
 MIT License - feel free to use in your projects.
+
+## Font Selection
+
+To generate font pairs for comparison, you can use an AI assistant like Claude with the following prompt (copy everything after the line):
+
+---
+I need help selecting Google Fonts pairs for a typography comparison. I'm looking for:
+1. A modern geometric sans-serif font for headlines
+2. Several clean, highly readable sans-serif fonts for body text that would pair well with the headline font
+
+For each font, please provide:
+- Font name as used in Google Fonts
+- CSS import URL
+- Brief explanation of why this font works well in this role
+
+Please format the output so it can be added to a fonts.txt file with the structure:
+FontName|css_url
+---
+
+The fonts.txt file should follow this format:
+
+# Font pairs for comparison (one per line)
+HeadlineFont + BodyFont1
+HeadlineFont + BodyFont2
+
+# Available fonts
+# Format: FontName|css_url
+FontName|css_url

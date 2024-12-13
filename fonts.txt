@@ -1,0 +1,13 @@
+# Font pairs for comparison (one per line)
+SpaceGrotesk + Inter
+SpaceGrotesk + Outfit
+SpaceGrotesk + DMSans
+SpaceGrotesk + PublicSans
+
+# Available fonts
+# Format: FontName|css_url
+SpaceGrotesk|https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500&display=swap
+Inter|https://fonts.googleapis.com/css2?family=Inter&display=swap
+Outfit|https://fonts.googleapis.com/css2?family=Outfit&display=swap
+DMSans|https://fonts.googleapis.com/css2?family=DM+Sans&display=swap
+PublicSans|https://fonts.googleapis.com/css2?family=Public+Sans&display=swap 
